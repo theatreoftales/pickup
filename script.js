@@ -20,19 +20,11 @@ const IS_STORE_OPEN = true;
     errTicket: { vi: "Lỗi khi lưu vé, bạn thử lại xem!", en: "An error occurred while saving your ticket. Please try again!" }
   };
 
-  // ========================================================================
-  // CẤU HÌNH API - THAY DÒNG DƯỚI BẰNG URL "Web app" bạn lấy được khi
-  // Deploy Apps Script (kết thúc bằng /exec).
-  // ========================================================================
-  const API_BASE_URL = "https://script.google.com/macros/s/DÁN_DEPLOYMENT_ID_CỦA_BẠN_VÀO_ĐÂY/exec";
 
-  // Các action không cần tham số => dùng GET (không bị preflight CORS chặn)
+  const API_BASE_URL = "https://script.google.com/macros/s/AKfycbw9juAgK6aqpaprJmOgO8klyYJyEHY8iyBpUssQuj0xWJfe7OGOyZumZsY1k1bY2gmCFQ/exec";
+
   const GET_ACTIONS = new Set(['getProducts', 'getEvents', 'getAllCustomerMap']);
 
-  // Thay thế cho google.script.run: gọi thẳng tới Web App Apps Script bằng fetch,
-  // nhờ vậy trang có thể host ở BẤT KỲ ĐÂU (GitHub Pages, v.v.) và chạy trên
-  // mọi trình duyệt, kể cả trình duyệt trong app Facebook - vì google.script.run
-  // chỉ hoạt động khi trang được chạy trong iframe của chính Apps Script.
   function runGoogleScript(funcName, ...args) {
     const url = `${API_BASE_URL}?action=${encodeURIComponent(funcName)}`;
 
@@ -40,7 +32,6 @@ const IS_STORE_OPEN = true;
     if (GET_ACTIONS.has(funcName)) {
       fetchPromise = fetch(url);
     } else {
-      // Map các tham số vị trí -> object payload theo đúng tên hàm gốc trong Code.gs
       let payload = {};
       if (funcName === 'createOrderTemp') {
         payload = { customerInfo: args[0], cartItems: args[1] };
@@ -52,8 +43,6 @@ const IS_STORE_OPEN = true;
 
       fetchPromise = fetch(url, {
         method: 'POST',
-        // Cố tình dùng text/plain (không phải application/json) để trình duyệt
-        // KHÔNG gửi preflight OPTIONS - Apps Script không xử lý được OPTIONS.
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       });
