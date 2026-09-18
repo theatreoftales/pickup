@@ -1,14 +1,4 @@
-  const IS_STORE_OPEN = true;
-  let productsData = [], cart = [], currentActiveImgUrl = "", currentSelectedProdIdx = null, toastTimeout = null;
-  let currentTempOrder = { customerInfo: null, cartItems: null, orderId: '', totalAmount: 0, paymentMethod: '' };
-  let currentLang = 'vi';
-  let selectedOptionIndex = null;
-
-  var customerMap = new Map();
-
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw9juAgK6aqpaprJmOgO8klyYJyEHY8iyBpUssQuj0xWJfe7OGOyZumZsY1k1bY2gmCFQ/execc";
-
-  const IS_STORE_OPEN = true;
+const IS_STORE_OPEN = true;
   let productsData = [], cart = [], currentActiveImgUrl = "", currentSelectedProdIdx = null, toastTimeout = null;
   let currentTempOrder = { customerInfo: null, cartItems: null, orderId: '', totalAmount: 0, paymentMethod: '' };
   let currentLang = 'vi';
@@ -30,25 +20,58 @@
     errTicket: { vi: "Lỗi khi lưu vé, bạn thử lại xem!", en: "An error occurred while saving your ticket. Please try again!" }
   };
 
-  async function callAppsScriptApi(action, payload = {}) {
-    try {
-      const response = await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action, ...payload })
+  // ========================================================================
+  // CẤU HÌNH API - THAY DÒNG DƯỚI BẰNG URL "Web app" bạn lấy được khi
+  // Deploy Apps Script (kết thúc bằng /exec).
+  // ========================================================================
+  const API_BASE_URL = "https://script.google.com/macros/s/DÁN_DEPLOYMENT_ID_CỦA_BẠN_VÀO_ĐÂY/exec";
+
+  // Các action không cần tham số => dùng GET (không bị preflight CORS chặn)
+  const GET_ACTIONS = new Set(['getProducts', 'getEvents', 'getAllCustomerMap']);
+
+  // Thay thế cho google.script.run: gọi thẳng tới Web App Apps Script bằng fetch,
+  // nhờ vậy trang có thể host ở BẤT KỲ ĐÂU (GitHub Pages, v.v.) và chạy trên
+  // mọi trình duyệt, kể cả trình duyệt trong app Facebook - vì google.script.run
+  // chỉ hoạt động khi trang được chạy trong iframe của chính Apps Script.
+  function runGoogleScript(funcName, ...args) {
+    const url = `${API_BASE_URL}?action=${encodeURIComponent(funcName)}`;
+
+    let fetchPromise;
+    if (GET_ACTIONS.has(funcName)) {
+      fetchPromise = fetch(url);
+    } else {
+      // Map các tham số vị trí -> object payload theo đúng tên hàm gốc trong Code.gs
+      let payload = {};
+      if (funcName === 'createOrderTemp') {
+        payload = { customerInfo: args[0], cartItems: args[1] };
+      } else if (funcName === 'confirmAndSaveOrder') {
+        payload = { customerInfo: args[0], cartItems: args[1], orderId: args[2], totalAmount: args[3], paymentMethod: args[4] };
+      } else if (funcName === 'getCustomerInfoByEmail') {
+        payload = { email: args[0] };
+      }
+
+      fetchPromise = fetch(url, {
+        method: 'POST',
+        // Cố tình dùng text/plain (không phải application/json) để trình duyệt
+        // KHÔNG gửi preflight OPTIONS - Apps Script không xử lý được OPTIONS.
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
       });
-      const res = await response.json();
-      if (res.status === "error") throw new Error(res.message);
-      return res.data;
-    } catch (err) {
-      console.error(`Lỗi thực thi API action [${action}]:`, err);
-      throw err;
     }
+
+    return fetchPromise
+      .then(res => res.json())
+      .then(json => {
+        if (!json || json.ok !== true) {
+          throw new Error((json && json.error) || 'Lỗi không xác định từ máy chủ');
+        }
+        return json.data;
+      });
   }
 
   document.addEventListener('DOMContentLoaded', async function() {
     try {
-      const products = await callAppsScriptApi('getProducts');
+      const products = await runGoogleScript('getProducts');
       productsData = products || [];
       renderProducts(productsData);
       await loadCustomerData();
@@ -66,7 +89,7 @@
 
   async function loadCustomerData() {
     try {
-      const mapObj = await callAppsScriptApi('getAllCustomerMap');
+      const mapObj = await runGoogleScript('getAllCustomerMap');
       if (mapObj) {
         customerMap = new Map(Object.entries(mapObj));
       }
@@ -75,23 +98,27 @@
     }
   }
 
-  document.addEventListener('contextmenu', function (e) {
-    e.preventDefault();
-  });
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'F12' || (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'I' || e.key === 'i'))) {
+    document.addEventListener('contextmenu', function (e) {
       e.preventDefault();
-      const message = (currentLang === 'en') 
-        ? "No F12 for you, ner nner na na!" 
-        : "Không cho F12 đấy lêu lêu!";
-      showToast(message);
-    }
-  });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'F12' || (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'I' || e.key === 'i'))) {
+        e.preventDefault();
+        
+        // Chọn câu thông báo dựa theo ngôn ngữ hiện tại
+        const message = (currentLang === 'en') 
+          ? "No F12 for you, ner nner na na!" 
+          : "Không cho F12 đấy lêu lêu!";
+          
+        showToast(message);
+      }
+    });
 
   function autoFillCustomerInfo(email) {
     const inputEmail = (email || document.getElementById('custEmail').value || '').trim().toLowerCase();
     if (!inputEmail) return;
+
     if (typeof customerMap === 'undefined' || !customerMap || customerMap.size === 0) return;
 
     const customer = customerMap.get(inputEmail);
@@ -668,46 +695,41 @@
   }
 
   async function choosePaymentMethod(method) {
-    currentTempOrder.paymentMethod = method;
     closeModal('selectPaymentModal');
 
-    try {
-      if (method === 'transfer') {
-        const tempOrderRes = await callAppsScriptApi('createOrderTemp', {
-          customerInfo: currentTempOrder.customerInfo,
-          cartItems: currentTempOrder.cartItems
-        });
-        document.getElementById('resTotalAmount').innerText = Number(tempOrderRes.totalAmount).toLocaleString();
-        document.getElementById('qrImg').src = tempOrderRes.qrUrl;
-        openModal('paymentModal');
-      } else {
-        await callAppsScriptApi('confirmAndSaveOrder', {
-          customerInfo: currentTempOrder.customerInfo,
-          cartItems: currentTempOrder.cartItems,
-          orderId: currentTempOrder.orderId,
-          totalAmount: currentTempOrder.totalAmount,
-          paymentMethod: 'fes'
-        });
-        showSuccessReceipt('fes');
+    let totalAmt = cart.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 0), 0);
+    currentTempOrder.totalAmount = totalAmt;
+    currentTempOrder.paymentMethod = method;
+
+    if (method === 'fes') {
+      finishOrderFlow();
+      try {
+        await runGoogleScript('confirmAndSaveOrder', currentTempOrder.customerInfo, currentTempOrder.cartItems, "", totalAmt, "fes");
+      } catch (err) {
+        console.error("Lỗi khi ghi đơn hàng:", err);
       }
-    } catch (err) {
-      showToast(TOAST_MSGS.errTicket[currentLang]);
+    } else if (method === 'transfer') {
+      try {
+        const res = await runGoogleScript('createOrderTemp', currentTempOrder.customerInfo, currentTempOrder.cartItems);
+        currentTempOrder.orderId = res.orderId;
+        currentTempOrder.totalAmount = res.totalAmount;
+        document.getElementById('resTotalAmount').innerText = (Number(res.totalAmount) || 0).toLocaleString();
+        document.getElementById('qrImg').src = res.qrUrl;
+        openModal('paymentModal');
+      } catch (err) {
+        showToast((currentLang === 'en' ? "Error: " : "Lỗi: ") + err.message);
+      }
     }
   }
 
   async function confirmPaymentDone() {
+    closeModal('paymentModal');
+    finishOrderFlow();
+
     try {
-      await callAppsScriptApi('confirmAndSaveOrder', {
-        customerInfo: currentTempOrder.customerInfo,
-        cartItems: currentTempOrder.cartItems,
-        orderId: currentTempOrder.orderId,
-        totalAmount: currentTempOrder.totalAmount,
-        paymentMethod: 'transfer'
-      });
-      closeModal('paymentModal');
-      showSuccessReceipt('transfer');
+      await runGoogleScript('confirmAndSaveOrder', currentTempOrder.customerInfo, currentTempOrder.cartItems, currentTempOrder.orderId, currentTempOrder.totalAmount, "transfer");
     } catch (err) {
-      showToast(TOAST_MSGS.errTicket[currentLang]);
+      console.error("Lỗi khi xác nhận chuyển khoản:", err);
     }
   }
 
