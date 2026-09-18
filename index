@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=EB+Garamond:wght@600;700&family=Inter:wght@400;600;700&family=Montserrat:wght@700;800&family=Libre+Barcode+128&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    .error-msg {
+      color: #dc3545 !important;
+      font-size: 13px !important;
+      font-weight: 500;
+      margin-top: 4px;
+      display: block;
+      text-align: left;
+    }
+    .input-error {
+      border: 1px solid #dc3545 !important;
+      background-color: #fff8f8;
+    }
+
+    * { box-sizing: border-box; }
+    
+    body, input, textarea, select, button, p, span, div, li, td, th {
+      font-family: 'Inter', sans-serif;
+    }
+
+    h1, .brand-name, .header-bar, .detail-title {
+      font-family: 'EB Garamond', serif;
+    }
+
+    h2, h3, h4, .options-title, .preorder-title {
+      font-family: 'Montserrat', sans-serif;
+    }
+    
+    body {
+      background: #fcfbf9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      min-height: 100vh;
+      color: #050a1d;
+    }
+    
+    .app-layout { display: flex; width: 100%; min-height: 100vh; }
+    
+    .sidebar {
+      width: 280px;
+      background: #f1f0ec;
+      padding: 25px 20px;
+      border-right: 1px solid #e8e3e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    
+    .brand-logo {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(5, 10, 29, 0.08);
+    }
+    
+    .brand-name {
+      font-size: 24px;
+      font-weight: 700;
+      color: #050a1d;
+      margin: 0 0 15px;
+    }
+    
+    .main-content {
+      flex: 1;
+      padding: 25px;
+      overflow-y: auto;
+      padding-bottom: 90px;
+      position: relative;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      width: 100%;
+    }
+
+    .store-closed-banner {
+      background-color: #050a1d;
+      color: #fcfbf9;
+      text-align: center;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 15px;
+      border: 1px solid #050a1d;
+    }
+    
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+    
+    .btn-add-cart-custom {
+      width: 300px;
+      padding: 14px 14px;
+      border-radius: 50px;
+      white-space: nowrap;
+    }
+
+    .btn-brand { background: #050a1d; color: #fcfbf9; }
+    .btn-brand:hover { background: #1a233d; }
+    .btn-success { background: #050a1d; color: #fff; }
+    .btn-success:hover { background: #1a233d; }
+    .btn-secondary { background: #e8e3e0; color: #050a1d; border: 1px solid #dcd6d1; }
+    .btn-secondary:hover { background: #dcd6d1; }
+    .btn-disabled {
+      background-color: #ccc !important;
+      color: #666 !important;
+      cursor: not-allowed !important;
+      opacity: 0.8;
+    }
+    
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .product-card {
+      border: 1px solid #e8e3e0;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      background: #e8e3e0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s;
+      cursor: pointer;
+      position: relative;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 18px rgba(5, 10, 29, 0.08);
+    }
+    .product-card img {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .product-card h4 {
+      margin: 12px 0 10px;
+      font-size: 16px;
+      color: #050a1d;
+    }
+    .product-card .price-pill {
+      background-color: #050a1d;
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 50px;
+      display: inline-block;
+      margin-top: auto;
+    }
+    
+    .product-detail-container {
+      background: #e8e3e0;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(5, 10, 29, 0.05);
+      border: 1px solid #e8e3e0;
+    }
+    .detail-layout {
+      display: flex;
+      gap: 30px;
+      margin-top: 20px;
+    }
+    .gallery-box { width: 320px; flex-shrink: 0; }
+    .main-img-wrap {
+      position: relative;
+      cursor: zoom-in;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid #dcd6d1;
+    }
+    .detail-main-img {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .thumbnails-list {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+    }
+    .thumb-img {
+      width: 58px;
+      height: 58px;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .thumb-img.active, .thumb-img:hover { border-color: #050a1d; }
+    .detail-content { flex: 1; }
+    .detail-title { font-size: 24px; color: #050a1d; margin: 0 0 10px; }
+    .detail-price { font-size: 20px; color: #050a1d; font-weight: 700; margin-bottom: 20px; }
+    .description-box {
+      background: #fcfbf9;
+      border-left: 4px solid #050a1d;
+      padding: 15px 20px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 25px;
+      line-height: 1.6;
+      color: #050a1d;
+      font-size: 14.5px;
+      white-space: pre-line;
+    }
+    .options-title { font-size: 16px; font-weight: 700; color: #050a1d; margin-bottom: 15px; }
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #050a1d;
+      margin: 25px 0 15px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title:first-of-type { margin-top: 0; }
+
+    .options-grid-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .option-item-new {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid #050a1d;
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: #fcfbf9;
+      color: #050a1d;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .option-item-new:hover,
+    .option-item-new.selected {
+      background: #050a1d;
+      color: #fcfbf9;
+      border-color: #050a1d;
+      box-shadow: 0 4px 12px rgba(5, 10, 29, 0.15);
+    }
+
+    .option-item-new-btn.active {
+      background: #050a1d;
+      color: #fcfbf9;
+      border-color: #050a1d;
+    }
+    .option-item-new.option-sold-out,
+    .option-item-new.option-sold-out:hover,
+    .option-item-new.option-sold-out:active,
+    .option-item-new.option-sold-out.selected {
+      color: #888888 !important;
+      background-color: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      transform: none !important;
+      cursor: default !important;
+    }
+  
+    .option-item-new.option-sold-out:hover {
+      background-color: transparent !important;
+      transform: none !important;
+      box-shadow: none !important;
+      border: none !important;
+      cursor: default !important;
+    }
+
+    .option-info { text-align: center; }
+    .option-info div { font-weight: 700; margin-bottom: 2px; }
+
+    .action-row-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .global-qty-box {
+      display: flex;
+      align-items: center;
+      background: transparent !important;
+      border: 1px solid #dcd6d1;
+      padding: 4px 8px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .qty-control {
+      display: flex;
+      align-items: center;
+      border: none solid #dcd6d1;
+      overflow: hidden;
+      background: transparent !important;
+    }
+    .qty-btn {
+      background: #e8e3e0;
+      border: none;
+      width: 28px;
+      height: 30px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #050a1d;
+      font-size: 15px;
+    }
+    .qty-btn:hover { background: #dcd6d1; }
+    
+    .qty-input {
+      width: 40px !important;
+      height: 30px !important;
+      border: none !important;
+      text-align: center !important;
+      font-weight: 700 !important;
+      font-size: 14px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      color: #050a1d !important;
+      background: transparent !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: textfield !important;
+      appearance: none !important;
+    }
+    .qty-input::-webkit-outer-spin-button,
+    .qty-input::-webkit-inner-spin-button {
+      -webkit-appearance: none !important;
+      margin: 0 !important;
+    }
+
+    .floating-cart-btn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: #050a1d;
+      color: #fcfbf9;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      box-shadow: 0 4px 15px rgba(5, 10, 29, 0.25);
+      cursor: pointer;
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    .floating-cart-btn:hover { transform: scale(1.08); background: #1a233d; }
+
+    .cart-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: #050a1d;
+      color: #ffffff;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 2px solid #fcfbf9;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(5, 10, 29, 0.4);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 15px;
+    }
+    .modal-content {
+      background: #fcfbf9;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 550px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 25px;
+      position: relative;
+      box-shadow: 0 10px 25px rgba(5, 10, 29, 0.15);
+      border: 1px solid #e8e3e0;
+    }
+    .close-btn {
+      position: absolute;
+      top: 15px; right: 15px;
+      font-size: 22px;
+      cursor: pointer;
+      color: #050a1d;
+      border: none;
+      background: 0 0;
+    }
+    .close-btn:hover { opacity: 0.7; }
+    
+    .toast-notification {
+      position: fixed;
+      bottom: 25px; left: 50%;
+      transform: translateX(-50%);
+      background-color: #050a1d;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 25px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.2);
+      font-weight: 600;
+      font-size: 14px;
+      z-index: 9999;
+      display: none;
+      white-space: nowrap;
+    }
+    .toast-notification.show {
+      display: block;
+      animation: fadeInOut 2.5s ease-in-out forwards;
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%,20px); }
+      15% { opacity: 1; transform: translate(-50%,0); }
+      85% { opacity: 1; transform: translate(-50%,0); }
+      100% { opacity: 0; transform: translate(-50%,-20px); }
+    }
+    
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dashed #dcd6d1;
+      padding: 12px 0;
+    }
+    input, textarea, select {
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 10px;
+      border: 1px solid #dcd6d1;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #fff;
+      color: #050a1d;
+    }
+
+    /* ===== SIDEBAR: BUTTON LỊCH FES ===== */
+    .btn-fes-calendar {
+      background: none;
+      border: none;
+      color: #050c1a;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 10px 0;
+      margin-bottom: 18px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-fes-calendar:hover {
+      opacity: 0.6;
+      text-decoration: underline;
+    }
+
+    /* ===== LỊCH FES: TIMELINE ===== */
+    .fes-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 34px;
+      padding-left: 4px;
+      margin-top: 10px;
+    }
+
+    .fes-item {
+      display: grid;
+      grid-template-columns: 150px 28px 1fr;
+      column-gap: 0;
+      align-items: start;
+      position: relative;
+    }
+
+    .fes-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 162.5px;
+      top: 18px;
+      bottom: -34px;
+      width: 3px;
+      background-image: radial-gradient(circle, #dcd6d1 1.3px, transparent 1.4px);
+      background-size: 3px 9px;
+      background-repeat: repeat-y;
+      z-index: 0;
+    }
+
+    .fes-date-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      padding-top: 4px;
+      padding-right: 16px;
+    }
+
+    .fes-date-mobile {
+      display: none;
+    }
+
+    .fes-date-text {
+      font-size: 14px;
+      font-weight: 800;
+      color: #050c1a;
+      white-space: nowrap;
+      letter-spacing: 0.2px;
+    }
+
+    .fes-date-year {
+      font-size: 12px;
+      font-weight: 700;
+      color: #050c1a;
+      opacity: 0.6;
+      letter-spacing: 0.5px;
+    }
+
+    .fes-date-col .fes-date-year { text-align: right; }
+    .fes-date-mobile .fes-date-year { text-align: left; }
+
+    .fes-dot-col {
+      display: flex;
+      justify-content: center;
+      padding-top: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .fes-dot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      background: #fcfbf9;
+      border-radius: 50%;
+    }
+
+    .fes-dot::before {
+      content: "\2726";
+      font-size: 16px;
+      line-height: 1;
+      color: #050c1a;
+    }
+
+    .fes-right-col {
+      margin-left: 14px;
+    }
+
+    .fes-content-box {
+      background: #e8e3e0;
+      border: 1px solid #dcd6d1;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+
+    .fes-event-img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .fes-event-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: #050c1a;
+      letter-spacing: 0.4px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .fes-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .fes-booth-pill {
+      display: inline-block;
+      background: #050c1a;
+      color: #fcfbf9;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 50px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .fes-event-desc {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #050c1a;
+      margin-bottom: 0;
+      white-space: pre-line;
+    }
+
+    .fes-status-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 50px;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .fes-status-badge.status-upcoming { background: #e6a817; color: #050c1a; }
+    .fes-status-badge.status-ongoing { background: #2e7d32; color: #fff; }
+    .fes-status-badge.status-ended { background: #d32f2f; color: #fff; }
+    
+    @media (max-width: 768px) {
+      .app-layout { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid #e8e3e0; padding: 20px; }
+      .main-content { padding: 15px; }
+      .detail-layout { flex-direction: column; }
+      .gallery-box { width: 100%; }
+      .header-bar { flex-direction: column; align-items: stretch; }
+      .search-bar-input { max-width: 100%; }
+
+      .action-row {
+        gap: 10px;
+      }
+      .btn-add-cart {
+        padding: 11px 12px;
+        font-size: 13px;
+      }
+
+      /* Lịch fes: gộp phần ngày vào chung khối với nội dung trên màn hình hẹp */
+      .fes-item {
+        grid-template-columns: 22px 1fr;
+      }
+      .fes-item:not(:last-child)::after {
+        left: 14.5px;
+      }
+      .fes-date-col {
+        display: none;
+      }
+      .fes-date-mobile {
+        display: block;
+        margin-bottom: 8px;
+      }
+      .fes-right-col {
+        margin-left: 10px;
+      }
+    }
+
+    .social-links-container {
+      display: flex;
+      gap: 10px; 
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      border-top: 1px solid #e8e3e0;
+      padding-top: 20px;
+      margin-top: auto;
+    }
+
+    .social-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px; height: 36px;
+      background-color: #e8e3e0;
+      color: #050a1d;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    .social-icon:hover {
+      background-color: #050a1d;
+      color: #fcfbf9;
+      transform: translateY(-3px);
+      box-shadow: 0 4px 10px rgba(5, 10, 29, 0.15);
+    }
+    
+    .sidebar-info { width: 100%; text-align: center; margin-top: 10px; }
+    .preorder-box {
+      background-color: #e8e3e0;
+      border: 1px solid #dcd6d1;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+    .preorder-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #050a1d;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+    .preorder-time { font-size: 15px; font-weight: 600; color: #050a1d; }
+    .sidebar-text, .sidebar-note {
+      font-size: 14px;
+      color: #050a1d;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    
+    .payment-options-container { display: flex; gap: 15px; margin-top: 20px; }
+    .payment-card {
+      flex: 1;
+      padding: 20px;
+      border: 2px solid #050a1d;
+      border-radius: 10px;
+      background: #fcfbf9;
+      cursor: pointer;
+      text-align: center;
+      font-weight: bold;
+      color: #050a1d;
+      transition: 0.2s;
+      text-transform: uppercase;
+    }
+    .payment-card:hover { background: #050a1d; color: #fff; }
+
+    .lang-pill-container {
+      position: absolute;
+      top: 20px; right: 25px;
+      z-index: 50;
+    }
+    .lang-pill-btn {
+      background-color: #fcfbf9;
+      border: 1.5px solid #050a1d;
+      border-radius: 30px;
+      padding: 3px 6px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(5, 10, 29, 0.15);
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+    .lang-option {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #050a1d;
+      transition: all 0.3s ease;
+    }
+    .lang-option.active { background-color: #050a1d; color: #fcfbf9; }
+
+    .vt-loader {
+      --vt-brass-light: #050a1d;
+      position: relative;
+      width: 300px; height: 300px;
+      margin: 40px auto;
+      overflow: hidden;
+      border-radius: 6px;
+      background: transparent !important;
+      font-family: 'EB Garamond', serif;
+    }
+    .vt-loader .vt-ticket {
+      position: absolute;
+      left: 50%; top: 0;
+      width: 234px; height: 300px;
+      z-index: 2;
+      animation: vt-rise 4.6s steps(1, end) infinite;
+    }
+    .vt-loader .vt-ticket img {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 300px !important;
+      height: auto !important;
+      max-width: none;
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+    @keyframes vt-rise {
+      0%    { transform: translate(-50%, 220px); }
+      4%    { transform: translate(-50%, 181px); }
+      6%    { transform: translate(-50%, 187px); }
+      10%   { transform: translate(-50%, 147px); }
+      12.5% { transform: translate(-50%, 153px); }
+      16%   { transform: translate(-50%, 113px); }
+      18.5% { transform: translate(-50%, 119px); }
+      22%   { transform: translate(-50%, 80px); }
+      24.5% { transform: translate(-50%, 86px); }
+      28%   { transform: translate(-50%, 46px); }
+      30.5% { transform: translate(-50%, 52px); }
+      34%   { transform: translate(-50%, 22px); }
+      36.5% { transform: translate(-50%, 28px); }
+      40%   { transform: translate(-50%, 20px); }
+      100%  { transform: translate(-50%, 20px); }
+    }
+    .vt-loader .vt-fade-mask {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 120px;
+      z-index: 3;
+      background: linear-gradient(to top, #fcfbf9 0%, rgba(252, 251, 249, 0.8) 20%, transparent 100%);
+      pointer-events: none;
+    }
+    .vt-loader .vt-caption {
+      position: absolute;
+      bottom: 14px; left: 0; right: 0;
+      text-align: center;
+      z-index: 4;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 1px;
+      color: var(--vt-brass-light);
+    }
+    .vt-loader .vt-caption span {
+      animation: vt-dot-fade 1.4s ease-in-out infinite;
+      color: #050a1d;
+    }
+    .vt-loader .vt-caption span:nth-child(2) { animation-delay: 0.2s; }
+    .vt-loader .vt-caption span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes vt-dot-fade {
+      0%, 80%, 100% { opacity: 0.2; }
+      40% { opacity: 1; }
+    }
+
+    .ticket-bill-modal-content {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      max-width: 400px !important;
+    }
+    .receipt-wrapper { padding: 10px 0; display: flex; justify-content: center; }
+    .thermal-receipt {
+      width: 100%;
+      background-color: #fbfbfb;
+      color: #111111;
+      font-family: 'Courier Prime', 'Courier New', monospace;
+      padding: 24px 20px 30px 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      position: relative;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 8px, black calc(100% - 8px), transparent 100%),
+                          radial-gradient(circle at 6px 0px, transparent 4px, black 5px),
+                          radial-gradient(circle at 6px 8px, transparent 4px, black 5px);
+      -webkit-mask-size: 100% 100%, 12px 8px, 12px 8px;
+      -webkit-mask-position: 0 0, top left, bottom left;
+      -webkit-mask-repeat: no-repeat, repeat-x, repeat-x;
+      mask-image: linear-gradient(to bottom, transparent 0px, black 8px, black calc(100% - 8px), transparent 100%),
+                  radial-gradient(circle at 6px 0px, transparent 4px, black 5px),
+                  radial-gradient(circle at 6px 8px, transparent 4px, black 5px);
+      mask-size: 100% 100%, 12px 8px, 12px 8px;
+      mask-position: 0 0, top left, bottom left;
+      mask-repeat: no-repeat, repeat-x, repeat-x;
+    }
+    .receipt-divider { border: none; border-top: 1px dashed #222222; margin: 12px 0; }
+    .receipt-header { text-align: center; padding: 0 10px; }
+    .receipt-logo {
+      width: auto !important; max-width: 80% !important; max-height: 100px !important; height: auto !important;
+      display: block !important; margin: 0 auto 10px auto !important; object-fit: contain !important;
+      filter: grayscale(100%) contrast(120%);
+    }
+    .receipt-cust-info { text-align: left; font-size: 12px; line-height: 1.5; }
+    .receipt-note-row { text-align: left; font-size: 11px; color: #555; line-height: 1.5; margin: 8px 0; }
+    .receipt-note-row b { font-style: italic; }
+    .receipt-cust-name { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+    .receipt-time-row { font-size: 11px; color: #333; }
+    .receipt-total-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; margin-top: 10px; }
+    .receipt-payment-note { font-size: 15px; color: #333; text-align: center; margin: 2px 0 12px 0; font-style: italic; }
+    .fake-barcode-container { text-align: center; margin: 35px 0 2px 0; }
+    .fake-barcode-font { font-family: 'Libre Barcode 128', cursive; font-size: 55px; letter-spacing: 2px; line-height: 1; user-select: none; }
+    .receipt-footer-text { font-size: 10px; text-align: center; line-height: 1.4; margin-top: 10px; font-style: italic; }
+    .ticket-action-btns { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
+
+    .search-bar-wrapper {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+    .search-input-custom {
+      max-width: 400px;
+      width: 100%;
+      margin-bottom: 0;
+      font-size: 14px;
+      border-radius: 50px;
+    }
+
+    .product-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: #050a1d;
+      font-weight: 700;
+      font-size: 14px;
+      margin: 30px 0 20px 0;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .product-divider::before,
+    .product-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px dashed #dcd6d1;
+    }
+    .product-divider::before {
+      margin-right: 15px;
+    }
+    .product-divider::after {
+      margin-left: 15px;
+    }
+
+    img, .detail-img-container, #detailMainImg {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: auto; 
+    }
+
+    body {
+      -webkit-touch-callout: none;
+    }
+
+    .image-lightbox-modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      justify-content: center;
+      align-items: center;
+      cursor: zoom-out;
+    }
+
+    .image-lightbox-modal img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+    }
+
+    #detailMainImg {
+      cursor: zoom-in;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="app-layout">
+  <div class="sidebar">
+    <div style="width: 100%;">
+      <img class="brand-logo" src="https://graph.facebook.com/TheatreofTales/picture?type=large" id="logoImg" alt="Logo">
+      <h1 class="brand-name">Theatre of Tales</h1>
+      
+      <div class="sidebar-info">
+        <div class="preorder-box">
+          <div class="preorder-title" data-vi="Thời gian nhận keep" data-en="Pickup Pre-order Period">Thời gian nhận keep</div>
+          <div class="preorder-time">23/09/2026 - 30/09/2026</div>
+        </div>
+
+        <button class="btn-fes-calendar" onclick="openFesCalendar()">
+          <i class="fas fa-calendar-alt"></i>
+          <span class="btn-text" data-vi="Lịch fes tham gia" data-en="Upcoming Events">Lịch fes tham gia</span>
+        </button>
+        
+        <p class="sidebar-note">
+          <strong data-vi="Lưu ý:" data-en="Note:">Lưu ý:</strong> 
+          <span data-vi="Tụi mình chỉ giải quyết việc thiếu hàng khi bạn kiểm đếm ngay tại quầy, nên các bạn hãy kiểm tra kĩ số lượng trước khi rời đi nha!" data-en="We can only address missing items if you count them right at the booth, so please check the quantity carefully before you leave!">Tụi mình chỉ giải quyết việc thiếu hàng khi bạn kiểm đếm ngay tại quầy, nên các bạn hãy kiểm tra kĩ số lượng trước khi rời đi nha!</span>
+        </p>
+
+        <p class="sidebar-text" data-vi="Nếu có thắc mắc gì, hãy nhắn tụi mình qua các kênh social dưới đây để được giải đáp sớm nhất nha!" data-en="If you have any questions, feel free to message us on our social channels below!">
+          Nếu có thắc mắc gì, hãy nhắn tụi mình qua các kênh social dưới đây để được giải đáp sớm nhất nha!
+        </p>
+      </div>
+    </div>
+
+    <div class="social-links-container">
+      <a href="https://www.facebook.com/TheatreofTales" target="_blank" data-title-vi="Facebook" data-title-en="Facebook" title="Facebook" class="social-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/>
+        </svg>
+      </a>
+      
+      <a href="https://www.instagram.com/theatre.of.tales/?hl=en" target="_blank" data-title-vi="Instagram" data-title-en="Instagram" title="Instagram" class="social-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.198-.509.333-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.282.11-.705.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.668 2.668 0 1 1 0 5.335 2.668 2.668 0 0 1 0-5.335z"/>
+        </svg>
+      </a>
+
+      <a href="https://x.com/TheatreofTales" target="_blank" data-title-vi="X (Twitter)" data-title-en="X (Twitter)" title="X (Twitter)" class="social-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.933l-3.86-5.05-4.41 5.05H.34l5.732-6.57L1 .75h5.048l3.493 4.613L12.6.015Zm-.86 13.028h1.36L4.323 2.145H2.865l8.875 11.633Z"/>
+        </svg>
+      </a>
+
+      <a href="mailto:menests.studio@gmail.com" data-title-vi="Email" data-title-en="Email" title="Email" class="social-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="lang-pill-container">
+      <div id="lang-toggle-btn" class="lang-pill-btn" onclick="toggleLanguage()">
+        <span class="lang-option active" id="lang-vi">VI</span>
+        <span class="lang-option" id="lang-en">EN</span>
+      </div>
+    </div>
+
+    <!-- MAIN PAGE -->
+    <div id="catalogView">
+      <div class="search-bar-wrapper">
+        <div style="position: relative; width: 100%; max-width: 400px;">
+          <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888; font-size: 14px;"></i>
+          <input type="text" id="searchProductInput" placeholder="Tìm kiếm sản phẩm hoặc nhân vật..." data-ph-vi="Tìm kiếm sản phẩm hoặc nhân vật..." data-ph-en="Search product name or characters..." class="search-input-custom" style="padding-left: 35px;" oninput="filterProductsLocally()">
+        </div>
+      </div>
+
+      <div id="storeClosedBannerContainer"></div>
+
+      <div class="vt-loader" id="loader">
+        <div class="vt-ticket">
+          <img src="https://i.ibb.co/rRcPD6wL/Theatre-of-Teyvat-namecard.jpg" alt="Theatre of Tales">
+        </div>
+        <div class="vt-fade-mask"></div>
+        <div class="vt-caption" data-vi="Đang kiểm tra vé" data-en="Checking ticket">Đang kiểm tra vé<span>.</span><span>.</span><span>.</span></div>
+      </div>
+
+      <!-- Phần Sản Phẩm Mới (New Arrivals) -->
+      <div id="newArrivalsSection" style="display:none;">
+        <div class="section-title" style="padding-left: 0; margin-left: 0; margin-bottom: 15px;">
+          <span data-vi="Sản Phẩm Mới" data-en="New Arrivals">Sản Phẩm Mới</span>
+        </div>
+      <div id="newProductList" class="products-grid" style="margin-bottom: 30px;"></div>
+      </div>
+
+      <div class="product-divider">‎‧₊˚✧Theatre of Tales✧˚₊‧</div>
+
+      <!-- Khu vực danh mục chung -->
+      <div id="catalogContentArea" style="display:none;">
+        <div id="productList" class="products-grid" style="margin-top: 15px;"></div>
+      </div>
+    </div>
+
+    <div id="fesCalendarView" style="display:none;">
+      <button class="btn btn-secondary" style="margin-bottom:20px;border-radius: 50px;" onclick="showCatalogView()">← Theatre of Tales</button>
+      <h2 class="detail-title" data-vi="Lịch Fes Tham Gia" data-en="Upcoming Events">Lịch Fes Tham Gia</h2>
+      <div id="fesTimelineContainer"></div>
+    </div>
+
+    <div id="detailView" style="display:none;">
+      <button class="btn btn-secondary" style="margin-bottom:20px;border-radius: 50px;" onclick="showCatalogView()">← Theatre of Tales</button>
+      <div class="product-detail-container">
+        <div class="detail-layout">
+          <div class="gallery-box">
+            <div class="main-img-wrap">
+              <img id="detailMainImg" class="detail-main-img" src="" alt="Sản phẩm">
+            </div>
+            <div id="thumbnailList" class="thumbnails-list"></div>
+          </div>
+          <div class="detail-content">
+            <h2 id="detailTitle" class="detail-title"></h2>
+            <div id="detailPrice" class="detail-price"></div>
+            <div class="options-title" data-vi="Mô tả sản phẩm:" data-en="Product Description:">Mô tả sản phẩm:</div>
+            <div id="detailDescription" class="description-box"></div>
+            <div class="options-title" data-vi="Các lựa chọn có sẵn:" data-en="Available Options:">Các lựa chọn có sẵn:</div>
+            <div id="detailOptionList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="floating-cart-btn" onclick="openCartModal()" title="Giỏ hàng" data-title-vi="Giỏ hàng" data-title-en="Cart">
+  <i class="fas fa-shopping-cart"></i>
+  <span class="cart-badge" id="cartCount">0</span>
+</div>
+
+<!-- MODAL GIỎ HÀNG -->
+<div class="modal-overlay" id="cartModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal('cartModal')">&times;</button>
+    <h3 style="margin-top:0;" data-vi="Giỏ hàng của bạn" data-en="Your Cart">Giỏ hàng của bạn</h3>
+    <div id="cartList" data-vi="Ở đây trống trải quá..." data-en="Your cart is empty...">Ở đây trống trải quá...</div>
+    <div style="text-align:right;font-size:18px;font-weight:700;margin:15px 0;color:#050a1d;" id="totalPrice">Tổng: 0đ</div>
+    
+    <hr style="border:none;border-top:1px solid #dcd6d1;margin:20px 0;">
+    <h3 data-vi="Thông tin nhận hàng" data-en="Pickup Information">Thông tin nhận hàng</h3>
+    
+    <input type="email" id="custEmail" placeholder="Email (*)" data-ph-vi="Email (*)" data-ph-en="Email (*)" autocomplete="off" onblur="autoFillCustomerInfo(this.value)">
+    <small class="error-msg" id="errEmail" style="display:none;"></small>
+
+    <input type="text" id="custFacebook" placeholder="Link Facebook (*)" data-ph-vi="Link Facebook (*)" data-ph-en="Facebook Link (*)">
+    <small class="error-msg" id="errFb" style="display:none;"></small>
+
+    <input type="text" id="custPickupName" placeholder="Tên Pick Up (*)" data-ph-vi="Tên Pick Up (*)" data-ph-en="Pickup Name (*)">
+    <small class="error-msg" id="errPickupName" style="display:none;"></small>
+
+    <select id="custPickupDate">
+      <option value="" data-vi="-- Chọn Ngày pick up (*) --" data-en="-- Select Pickup Date (*) --">-- Chọn Ngày pick up (*) --</option>
+      <option value="Cofi Day 1">Cofi Day 1</option>
+      <option value="Cofi Day 2">Cofi Day 2</option>
+      <option value="Artist Day Hà Nội">Artist Day Hà Nội</option>
+    </select>
+    <small class="error-msg" id="errPickupDate" style="display:none;"></small>
+
+    <textarea id="custNote" placeholder="Ghi chú đơn hàng" data-ph-vi="Ghi chú đơn hàng" data-ph-en="Order Note" rows="2"></textarea>
+
+    <button id="btnSubmitOrder" class="btn btn-success" style="width:100%;padding:12px;margin-top:10px;" onclick="submitOrder(event)" data-vi="Chốt đơn" data-en="Place Order">Chốt đơn</button>
+  </div>
+</div>
+
+<!-- MODAL CHỌN HÌNH THỨC THANH TOÁN -->
+<div class="modal-overlay" id="selectPaymentModal">
+  <div class="modal-content" style="text-align:center;">
+    <button class="close-btn" onclick="closeModal('selectPaymentModal')">&times;</button>
+    <h3 style="color:#050a1d;margin-top:0;" data-vi="Phương thức thanh toán" data-en="Payment Method">Phương thức thanh toán</h3>
+    <p data-vi="Vui lòng chọn hình thức thanh toán bạn muốn sử dụng:" data-en="Please select your preferred payment method:">Vui lòng chọn hình thức thanh toán bạn muốn sử dụng:</p>
+    
+    <div class="payment-options-container">
+      <div class="payment-card" onclick="choosePaymentMethod('fes')" data-vi="Thanh toán tại fes" data-en="Pay at Event">Thanh toán tại fes</div>
+      <div class="payment-card" onclick="choosePaymentMethod('transfer')" data-vi="Chuyển khoản luôn" data-en="Bank Transfer">Chuyển khoản luôn</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL THANH TOÁN CHUYỂN KHOẢN QR -->
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal-content" style="text-align:center;">
+    <button class="close-btn" onclick="closeModal('paymentModal')">&times;</button>
+    <div id="qrStep1">
+      <h3 style="color:#050a1d;margin-top:0;" data-vi="Mã QR Thanh Toán" data-en="Payment QR Code">Mã QR Thanh Toán</h3>
+      <p><span data-vi="Tổng tiền:" data-en="Total:">Tổng tiền:</span> <b id="resTotalAmount" style="color:#d9534f;"></b> VNĐ</p>
+      <p style="font-size:14px;color:#555;margin:15px 0;" data-vi="Quét mã QR bên dưới để chuyển khoản:" data-en="Scan the QR code below to pay:">Quét mã QR bên dưới để chuyển khoản:</p>
+      <img id="qrImg" src="" alt="QR Code" style="max-width:250px;border-radius:8px;margin-bottom:15px;"><br>
+      <button id="btnPaidConfirm" onclick="confirmPaymentDone()" style="background-color:#050a1d;color:#fff;border:none;padding:12px 24px;font-size:15px;font-weight:700;border-radius:5px;cursor:pointer;" data-vi="Xác nhận đã chuyển khoản" data-en="Confirm Transfer">
+        Xác nhận đã chuyển khoản
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL THÔNG BÁO HOÀN THÀNH -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal-content ticket-bill-modal-content">
+    <div class="receipt-wrapper">
+      <div class="thermal-receipt" id="ticketBillArea">
+        <div class="receipt-header">
+          <img src="https://i.ibb.co/GQkssRQH/Theatre-of-Teyvat-golden-logo.png" alt="Theatre of Tales Logo" class="receipt-logo">
+        </div>
+        <hr class="receipt-divider">
+        <div class="receipt-cust-info">
+          <div class="receipt-cust-name">
+            <span data-vi="Tên Pickup: " data-en="Pickup Name: ">Tên Pickup: </span><span id="ticketPickupName">--</span>
+          </div>
+          <div class="receipt-time-row">
+            <span id="ticketTime">--:-- --</span>, <span id="ticketDate">--/--/2026</span><span data-vi=" | Ngày nhận keep: " data-en=" | Pickup Date: "> | Ngày nhận keep: </span><span id="ticketPickupDate" style="font-weight:700;">--</span>
+          </div>
+        </div>
+        <hr class="receipt-divider">
+        <div class="receipt-item-list" id="ticketItemList"></div>
+        <div class="receipt-note-row" id="ticketNoteRow" style="display:none;"></div>
+        <hr class="receipt-divider">
+        <div class="receipt-total-row">
+          <span data-vi="TỔNG GIÁ" data-en="TOTAL">TỔNG GIÁ</span>
+          <span id="ticketTotalPrice">0 VNĐ</span>
+        </div>
+        <div class="fake-barcode-container">
+          <div class="fake-barcode-font">*TOT2026ORDER*</div>
+        </div>
+        <div class="receipt-payment-note" id="ticketPaymentNote">Trả tại Fes</div>
+        <div class="receipt-footer-text" data-vi="Cảm ơn bạn đã ủng hộ tụi mình! Hãy lưu lại ảnh này trong trường hợp bạn cần ghi nhớ đơn hàng của bản thân nha! Hẹn gặp lại bạn tại Fes!" data-en="Thank you for supporting us! Please save this image in case you need to remember your order! See you at the Fes!">
+          Cảm ơn bạn đã ủng hộ tụi mình! Hãy lưu lại ảnh này trong trường hợp bạn cần ghi nhớ đơn hàng của bản thân nha! Hẹn gặp lại bạn tại Fes!
+        </div>
+      </div>
+    </div>
+    <div class="ticket-action-btns">
+      <button class="btn btn-brand" onclick="downloadTicketImage()" data-vi="Lưu vé về máy" data-en="Save Ticket">Lưu vé về máy</button>
+      <button class="btn btn-secondary" onclick="closeModal('successModal')" data-vi="Đóng" data-en="Close">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<?!= include('JavaScript'); ?>
+
+<div id="imageLightbox" class="image-lightbox-modal" onclick="closeImageLightbox()">
+  <img id="lightboxImg" src="" alt="Expanded Image">
+</div>
+
+</body>
+</html>
