@@ -465,22 +465,22 @@ const IS_STORE_OPEN = true;
   // ===== LỊCH FES THAM GIA =====
   let fesEventsData = [];
 
-  function openFesCalendar() {
-    document.getElementById('catalogView').style.display = 'none';
-    document.getElementById('detailView').style.display = 'none';
-    document.getElementById('fesCalendarView').style.display = 'block';
-    document.getElementById('fesTimelineContainer').innerHTML =
-      `<div style="text-align:center;padding:40px;color:#666;">${currentLang === 'en' ? 'Loading fes schedule...' : 'Đang tải lịch fes...'}</div>`;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  async function openFesCalendar() {
+  document.getElementById('catalogView').style.display = 'none';
+  document.getElementById('detailView').style.display = 'none';
+  document.getElementById('fesCalendarView').style.display = 'block';
+  document.getElementById('fesTimelineContainer').innerHTML =
+    `<div style="text-align:center;padding:40px;color:#666;">${currentLang === 'en' ? 'Loading fes schedule...' : 'Đang tải lịch fes...'}</div>`;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    google.script.run
-      .withSuccessHandler(renderFesTimeline)
-      .withFailureHandler(function(err) {
-        document.getElementById('fesTimelineContainer').innerHTML =
-          `<div style="text-align:center;padding:40px;color:#d32f2f;">${currentLang === 'en' ? 'Error loading data: ' : 'Lỗi tải dữ liệu: '}${err.message}</div>`;
-      })
-      .getEvents();
+  try {
+    const events = await runGoogleScript('getEvents');
+    renderFesTimeline(events);
+  } catch (err) {
+    document.getElementById('fesTimelineContainer').innerHTML =
+      `<div style="text-align:center;padding:40px;color:#d32f2f;">${currentLang === 'en' ? 'Error loading data: ' : 'Lỗi tải dữ liệu: '}${err.message}</div>`;
   }
+}
 
   function parseFesDate(str) {
     // Kỳ vọng backend trả dd/MM/yyyy. Trả về {dd, mm, yyyy} hoặc null nếu không hợp lệ.
