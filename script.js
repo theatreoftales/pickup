@@ -4,8 +4,6 @@ const IS_STORE_OPEN = true;
   let currentLang = 'vi';
   let selectedOptionIndex = null;
 
-  var customerMap = new Map();
-
   const TOAST_MSGS = {
     closed: { vi: "Hàng trưng bày chưa bán", en: "Display items only" },
     limitStock: (n) => ({ vi: `Chỉ còn ${n} sản phẩm thui nha!`, en: `Only ${n} left in stock!` }),
@@ -61,29 +59,10 @@ const IS_STORE_OPEN = true;
       const products = await runGoogleScript('getProducts');
       productsData = products || [];
       renderProducts(productsData);
-      await loadCustomerData();
     } catch (err) {
       console.error("Lỗi khởi tạo dữ liệu:", err);
     }
-
-    const emailInput = document.getElementById('custEmail');
-    if (emailInput) {
-      emailInput.addEventListener('input', function() {
-        autoFillCustomerInfo(this.value);
-      });
-    }
   });
-
-  async function loadCustomerData() {
-    try {
-      const mapObj = await runGoogleScript('getAllCustomerMap');
-      if (mapObj) {
-        customerMap = new Map(Object.entries(mapObj));
-      }
-    } catch (err) {
-      console.error("Không thể tải bản đồ khách hàng:", err);
-    }
-  }
 
     document.addEventListener('contextmenu', function (e) {
       e.preventDefault();
@@ -101,22 +80,6 @@ const IS_STORE_OPEN = true;
         showToast(message);
       }
     });
-
-  function autoFillCustomerInfo(email) {
-    const inputEmail = (email || document.getElementById('custEmail').value || '').trim().toLowerCase();
-    if (!inputEmail) return;
-
-    if (typeof customerMap === 'undefined' || !customerMap || customerMap.size === 0) return;
-
-    const customer = customerMap.get(inputEmail);
-    if (customer) {
-      const fbInput = document.getElementById('custFacebook');
-      if (fbInput) fbInput.value = customer.facebook || '';
-
-      const nameInput = document.getElementById('custPickupName');
-      if (nameInput) nameInput.value = customer.pickupName || '';
-    }
-  }
 
   function renderProducts(products) {
     const loader = document.getElementById('loader');
