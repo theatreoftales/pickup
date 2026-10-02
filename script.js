@@ -1,4 +1,4 @@
-const IS_STORE_OPEN = true;
+const IS_STORE_OPEN = false;
   let productsData = [], cart = [], currentActiveImgUrl = "", currentSelectedProdIdx = null, toastTimeout = null;
   let currentTempOrder = { customerInfo: null, cartItems: null, orderId: '', totalAmount: 0, paymentMethod: '' };
   let currentLang = 'vi';
